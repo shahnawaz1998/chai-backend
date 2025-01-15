@@ -6,10 +6,12 @@ const uploadOnCloudinary = async (localFilePath) =>{
         if (!localFilePath) return null;
             
         //upload the file on cloudinary
-       const response = cloudinary.uploader.upload(localFilePath,{resource_type:"auto"})
+       const response = await cloudinary.uploader.upload(localFilePath,{resource_type:"auto"})
 
         //file has been uploaded successfully
-        console.log("file is uploaded on cloudinary",response.url);
+        // console.log("file is uploaded on cloudinary",response.url);
+        
+         fs.unlinkSync(localFilePath)
         return response;
         
     } catch (error) {
@@ -19,9 +21,9 @@ const uploadOnCloudinary = async (localFilePath) =>{
 }
 
 cloudinary.config({ 
-    cloud_name: 'dnidac3oj', 
-    api_key: '517787557146811', 
-    api_secret: '<your_api_secret>' // Click 'View API Keys' above to copy your API secret
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME , 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET // Click 'View API Keys' above to copy your API secret
 });
 
 export {uploadOnCloudinary}
