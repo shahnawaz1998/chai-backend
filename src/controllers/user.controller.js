@@ -1,6 +1,6 @@
 import {asyncHandler} from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js";
-import {User} from "../models/user.model.js";
+// import {User} from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
@@ -135,7 +135,10 @@ const loginUser = asyncHandler(async (req,res)=>{
     const accessToken = jwt.sign({user},process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1d'})
     const refreshToken = jwt.sign({user},process.env.REFRESH_TOKEN_SECRET,{expiresIn:'10d'})
 
-    console.log(accessToken)
+    // user.refreshToken = refreshToken
+    // await user.save({validateBeforeSave:false})
+
+    // console.log(accessToken)
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
@@ -191,9 +194,10 @@ const refreshAccessToken = asyncHandler(async (req,res)=>{
             incmoingRefreshToken,process.env.REFRESH_TOKEN_SECRET
         )
     
-        console.log(decodedToken);
+        // console.log(decodedToken);
     
-        const user = await User.findById(decodedToken?.user?._id)
+        const user = await User.findById(decodedToken?._id)
+        console.log(user)
     
         if(!user) {
             throw new ApiError(401,"Invalid refresh token")
@@ -205,7 +209,7 @@ const refreshAccessToken = asyncHandler(async (req,res)=>{
     
         const accessToken = await jwt.sign({user},process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1d'})
         const newRefreshToken = await  jwt.sign({user},process.env.REFRESH_TOKEN_SECRET,{expiresIn:'10d'})
-    
+        
         const options = {
             httpOnly:true,
             secure:true
@@ -229,7 +233,7 @@ const refreshAccessToken = asyncHandler(async (req,res)=>{
 
     const {oldPassword,newPassword} = req.body;
 
-    const user = User.findById(req.user?._id)
+    const user = await User.findById(req.user?._id)
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
     if(!isPasswordCorrect)
